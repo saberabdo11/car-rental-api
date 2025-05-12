@@ -2,14 +2,39 @@
 
 namespace App\Entity;
 
+use ApiPlatform\Metadata\ApiResource;
+use ApiPlatform\Metadata\Post;
 use App\Repository\UserRepository;
+use App\State\UserRegistrationProcessor;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
+use Symfony\Component\Serializer\Annotation\Groups;
+use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: UserRepository::class)]
 #[ORM\UniqueConstraint(name: 'UNIQ_IDENTIFIER_EMAIL', fields: ['email'])]
+#[UniqueEntity(
+    fields: ['email'],
+    message: 'Cet email est déjà utilisé.'
+)]
 #[ORM\Table(name: "users")]
+
+#[ApiResource(
+    operations: [
+        new Post(
+            uriTemplate: '/register',
+            processor: UserRegistrationProcessor::class,
+            normalizationContext: ['groups' => ['user:read']],
+            denormalizationContext: ['groups' => ['user:write']],
+            validationContext: ['groups' => ['Default']]
+        )
+    ]
+)]
+
+
+
 class User implements UserInterface, PasswordAuthenticatedUserInterface
 {
     #[ORM\Id]
@@ -17,6 +42,9 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column]
     private ?int $id = null;
 
+    #[Groups(['user:write'])]
+    #[Assert\NotBlank(message: 'L’email est obligatoire.')]
+    #[Assert\Email(message: 'Email invalide.')]
     #[ORM\Column(length: 180)]
     private ?string $email = null;
 
@@ -24,12 +52,15 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
      * @var list<string> The user roles
      */
     #[ORM\Column]
+    #[Groups(['user:read'])]
     private array $roles = [];
 
     /**
      * @var string The hashed password
      */
     #[ORM\Column]
+    #[Groups(['user:write'])]
+    #[Assert\NotBlank(message: 'Le mot de passe est obligatoire.')]
     private ?string $password = null;
 
     public function getId(): ?int
