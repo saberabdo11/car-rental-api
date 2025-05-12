@@ -21,7 +21,7 @@ security:
         username_path: email
         password_path: password
         success_handler: lexik_jwt_authentication.handler.authentication_success
-        failure_handler: lexik_jwt_authentication.handler.authentication_failure
+        failure_handler: App\Security\LoginFailureHandler
     api:
       pattern: ^/api
       stateless: true
@@ -40,6 +40,7 @@ security:
   # Note: Only the *first* access control that matches will be used
   access_control:
     - { path: ^/api/register, roles: PUBLIC_ACCESS }
+    - { path: ^/api/login, roles: PUBLIC_ACCESS }
     - { path: ^/api/docs, roles: PUBLIC_ACCESS }
     - { path: ^/api, roles: IS_AUTHENTICATED_FULLY }
     # - { path: ^/admin, roles: ROLE_ADMIN }
