@@ -26,21 +26,27 @@ class ReservationValidator
         }
     }
 
-    public function assertCarIsAvailable(Car $car, \DateTimeInterface $start, \DateTimeInterface $end): void
+    public function assertCarIsAvailable(Car $car, \DateTimeInterface $start, \DateTimeInterface $end, ?Reservation $current = null): void
     {
-        $overlap = $this->em->getRepository(Reservation::class)
+        $qb = $this->em->getRepository(Reservation::class)
             ->createQueryBuilder('r')
             ->andWhere('r.car = :car')
             ->andWhere('r.endDate > :start')
             ->andWhere('r.startDate < :end')
             ->setParameter('car', $car)
             ->setParameter('start', $start)
-            ->setParameter('end', $end)
-            ->getQuery()
-            ->getResult();
+            ->setParameter('end', $end);
+
+        if ($current) {
+            // Exclude the current reservation from the overlap check
+            $qb->andWhere('r.id != :currentId')
+                ->setParameter('currentId', $current->getId());
+        }
+
+        $overlap = $qb->getQuery()->getResult();
 
         if (!empty($overlap)) {
-            throw new BadRequestHttpException("Cette voiture est déjà réservée pour cette période.");
+            throw new \RuntimeException("Cette voiture est déjà réservée pour cette période.");
         }
     }
 }

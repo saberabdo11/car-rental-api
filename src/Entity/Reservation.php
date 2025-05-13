@@ -6,10 +6,12 @@ use ApiPlatform\Metadata\ApiResource;
 use ApiPlatform\Metadata\GetCollection;
 use ApiPlatform\Metadata\Link;
 use ApiPlatform\Metadata\Post;
+use ApiPlatform\Metadata\Put;
 use App\Dto\ReservationInput;
 use App\Provider\UserReservationsProvider;
 use App\Repository\ReservationRepository;
 use App\State\ReservationProcessor;
+use App\State\ReservationUpdateProcessor;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Serializer\Annotation\Groups;
 
@@ -34,6 +36,10 @@ use Symfony\Component\Serializer\Annotation\Groups;
             ],
             provider: UserReservationsProvider::class,
             normalizationContext: ['groups' => ['reservation:read']],
+        ),
+        new Put(
+            input: ReservationInput::class,
+            processor: ReservationUpdateProcessor::class,
         ),
     ]
 )]

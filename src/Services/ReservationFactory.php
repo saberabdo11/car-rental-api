@@ -19,4 +19,13 @@ class ReservationFactory
 
         return $reservation;
     }
+
+    public function update(Reservation $reservation, Car $car, \DateTimeInterface $start, \DateTimeInterface $end): Reservation
+    {
+        $reservation->setCar($car);
+        $reservation->setStartDate($start);
+        $reservation->setEndDate($end);
+       
+        return $reservation;
+    }
 }
