@@ -3,8 +3,11 @@
 namespace App\Entity;
 
 use ApiPlatform\Metadata\ApiResource;
+use ApiPlatform\Metadata\GetCollection;
+use ApiPlatform\Metadata\Link;
 use ApiPlatform\Metadata\Post;
 use App\Dto\ReservationInput;
+use App\Provider\UserReservationsProvider;
 use App\Repository\ReservationRepository;
 use App\State\ReservationProcessor;
 use Doctrine\ORM\Mapping as ORM;
@@ -23,6 +26,14 @@ use Symfony\Component\Serializer\Annotation\Groups;
             input: ReservationInput::class,
             processor: ReservationProcessor::class,
             security: "is_granted('ROLE_USER')"
+        ),
+        new GetCollection(
+            uriTemplate: '/users/{userId}/reservations',
+            uriVariables: [
+                'userId' => new Link(fromClass: User::class, toProperty: 'user')
+            ],
+            provider: UserReservationsProvider::class,
+            normalizationContext: ['groups' => ['reservation:read']],
         ),
     ]
 )]
