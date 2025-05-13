@@ -3,6 +3,7 @@
 namespace App\Entity;
 
 use ApiPlatform\Metadata\ApiResource;
+use ApiPlatform\Metadata\Delete;
 use ApiPlatform\Metadata\GetCollection;
 use ApiPlatform\Metadata\Link;
 use ApiPlatform\Metadata\Post;
@@ -40,6 +41,9 @@ use Symfony\Component\Serializer\Annotation\Groups;
         new Put(
             input: ReservationInput::class,
             processor: ReservationUpdateProcessor::class,
+        ),
+        new Delete(
+            security: 'object.getUser() == user'
         ),
     ]
 )]
